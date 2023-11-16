@@ -1,0 +1,243 @@
+openapi: 3.0.0
+info:
+  title: API de Pedidos de Crédito
+  description: Essa API permite consultar, criar, atualizar e deletar pedidos de crédito.
+  version: 1.0.0
+servers:
+  - url: https://api.pedidos.com.br
+paths:
+  /pedidos:
+    get:
+      summary: Buscar pedidos de crédito
+      description: Essa consulta permite buscar os pedidos de crédito de acordo com vários critérios, como código do cliente, nome do produto, valor do pedido, data do pedido, status do pedido, etc.
+      parameters:
+        - name: codigoCliente
+          in: query
+          description: O código do cliente que fez o pedido de crédito.
+          schema:
+            type: string
+        - name: nomeProduto
+          in: query
+          description: O nome do produto solicitado pelo cliente.
+          schema:
+            type: string
+        - name: valorMinimo
+          in: query
+          description: O valor mínimo do pedido de crédito.
+          schema:
+            type: number
+        - name: valorMaximo
+          in: query
+          description: O valor máximo do pedido de crédito.
+          schema:
+            type: number
+        - name: dataInicio
+          in: query
+          description: A data de início do período de consulta dos pedidos de crédito.
+          schema:
+            type: string
+            format: date
+        - name: dataFim
+          in: query
+          description: A data de fim do período de consulta dos pedidos de crédito.
+          schema:
+            type: string
+            format: date
+        - name: status
+          in: query
+          description: O status do pedido de crédito, que pode ser NOVO, EM_ANALISE, APROVADO, REPROVADO ou CANCELADO, etc.
+          schema:
+            type: string
+            enum: [NOVO, EM_ANALISE, APROVADO, REPROVADO, CANCELADO]
+        - name: sortBy
+          in: query
+          description: O campo pelo qual os pedidos de crédito serão ordenados, que pode ser codigoPedidoCredito, codigoCliente, nomeProduto, valorPedido, dataPedido ou statusPedido.
+          schema:
+            type: string
+            enum: [codigoPedidoCredito, codigoCliente, nomeProduto, valorPedido, dataPedido, statusPedido]
+        - name: pageSize
+          in: query
+          description: O número de pedidos de crédito que serão retornados por página.
+          schema:
+            type: integer
+        - name: pageNumber
+          in: query
+          description: O número da página que será retornada.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Uma lista de pedidos de crédito que atendem aos critérios da consulta.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pedido'
+        '400':
+          description: Um erro ocorreu na consulta, devido a algum parâmetro inválido ou faltando.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+    post:
+      summary: Criar um novo pedido de crédito
+      description: Essa rota permite criar um novo pedido de crédito, com os dados informados no body.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pedido'
+      responses:
+        '201':
+          description: Um novo pedido de crédito foi criado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pedido'
+        '400':
+          description: Um erro ocorreu na criação do pedido de crédito, devido a algum dado inválido ou faltando.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+  /pedidos/{CodigoPedidoCredito}:
+    get:
+      summary: Buscar um pedido de crédito específico
+      description: Essa consulta permite buscar um pedido de crédito específico, de acordo com o código do pedido de crédito informado na URL.
+      parameters:
+        - name: CodigoPedidoCredito
+          in: path
+          description: O código do pedido de crédito que se deseja consultar.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Um pedido de crédito que corresponde ao código informado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pedido'
+        '404':
+          description: Um pedido de crédito com o código informado não foi encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+    put:
+      summary: Atualizar um pedido de crédito específico
+      description: Essa rota permite atualizar um pedido de crédito específico, de acordo com o código do pedido de crédito informado na URL.
+      parameters:
+        - name: CodigoPedidoCredito
+          in: path
+          description: O código do pedido de crédito que se deseja atualizar.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pedido'
+      responses:
+        '200':
+          description: Um pedido de crédito foi atualizado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pedido'
+        '400':
+          description: Um erro ocorreu na atualização do pedido de crédito, devido a algum dado inválido ou faltando.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '404':
+          description: Um pedido de crédito com o código informado não foi encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+    delete:
+      summary: Deletar um pedido de crédito específico
+      description: Essa rota permite deletar um pedido de crédito específico, de acordo com o código do pedido de crédito informado na URL.
+      parameters:
+        - name: CodigoPedidoCredito
+          in: path
+          description: O código do pedido de crédito que se deseja deletar.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Um pedido de crédito foi deletado com sucesso.
+        '404':
+          description: Um pedido de crédito com o código informado não foi encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+components:
+  schemas:
+    Pedido:
+      type: object
+      properties:
+        codigoCliente:
+          type: string
+          description: O código do cliente que fez o pedido de crédito.
+        agencia:
+          type: string
+          description: A agência do cliente que fez o pedido de crédito.
+        conta:
+          type: string
+          description: A conta do cliente que fez o pedido de crédito.
+        regiao:
+          type: string
+          description: A região do cliente que fez o pedido de crédito.
+        dicom:
+          type: string
+          description: O dicom do cliente que fez o pedido de crédito.
+        statusPedido:
+          type: string
+          description: O status do pedido de crédito, que pode ser NOVO, EM_ANALISE, APROVADO, REPROVADO ou CANCELADO, etc.
+        segmentoBancario:
+          type: string
+          description: O segmento bancário do cliente que fez o pedido de crédito.
+        codigoCanalSolicitacao:
+          type: string
+          description: O código do canal de solicitação do pedido de crédito.
+        descricaoCanalSolicitacao:
+          type: string
+          description: A descrição do canal de solicitação do pedido de crédito.
+        valorPedido:
+          type: number
+          description: O valor do pedido de crédito.
+        unidadeMonetaria:
+          type: string
+          description: A unidade monetária do pedido de crédito.
+        nomeGrupo:
+          type: string
+          description: O nome do grupo do cliente que fez o pedido de crédito.
+        dataPedido:
+          type: string
+          format: date-time
+          description: A data do pedido de crédito.
+        prazo:
+          type: integer
+          description: O prazo do pedido de crédito, em dias.
+        unidadePrazo:
+          type: string
+          description: A unidade do prazo do pedido de crédito.
+        codigoIdentificacaoOrigem:
+          type: string
+          description: O código de identificação da origem do pedido de crédito.
+        codigoProduto:
+          type: string
+          description: O código do produto solicitado pelo cliente.
+        descricaoProduto:
