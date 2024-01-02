@@ -240,8 +240,172 @@ paths:
         responseParameters: # Mapeamento dos parâmetros de resposta
           method.response.header.Content-Type: integration.response.header.Content-Type
       x-amazon-apigateway-request-validator: all # Validador de solicitação
+  credito/v1/parametrizacoes:
+    post:
+      summary: Cria um novo objeto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Objeto'
+      responses:
+        '201':
+          description: Objeto criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Objeto'
+        '400':
+          description: Objeto inválido
+        '500':
+          description: Erro interno do servidor
+      # Propriedades adicionais para a integração mocada
+      x-amazon-apigateway-integration:
+        type: mock # Tipo de integração
+        requestTemplates: # Template de solicitação
+          application/json: |
+            {
+              "statusCode": 200
+            }
+        responses: # Respostas de integração
+          default:
+            statusCode: 201
+            responseTemplates: # Template de resposta
+              application/json: |
+                #set($inputRoot = $input.path('$'))
+                {
+                  "id": "$inputRoot.id",
+                  "cod_iderf_vers_reg": "$inputRoot.cod_iderf_vers_reg",
+                  "num_fun_col_cola": "$inputRoot.num_fun_col_cola",
+                  "ind_vers_ptva": $inputRoot.ind_vers_ptva,
+                  "txt_objt_estr_list_regr": $inputRoot.txt_objt_estr_list_regr,
+                  "condicao": $inputRoot.condicao,
+                  "ordem": $inputRoot.ordem,
+                  "habilitado": $inputRoot.habilitado
+                }
+    get:
+      summary: Obtém uma lista de objetos
+      responses:
+        '200':
+          description: Uma lista de objetos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Objeto'
+        '500':
+          description: Erro interno do servidor
+      # Propriedades adicionais para a integração mocada
+      x-amazon-apigateway-integration:
+        type: mock # Tipo de integração
+        requestTemplates: # Template de solicitação
+          application/json: |
+            {
+              "statusCode": 200
+            }
+        responses: # Respostas de integração
+          default:
+            statusCode: 200
+            responseTemplates: # Template de resposta
+              application/json: |
+                [
+                  {
+                    "id": "173069367821",
+                    "cod_iderf_vers_reg": "01/21/2020",
+                    "num_fun_col_cola": "9999999999",
+                    "ind_vers_ptva": true,
+                    "txt_objt_estr_list_regr": [
+                      {
+                        "nome": "teste",
+                        "id": "1730693694917",
+                        "descricao": "",
+                        "valor_regra": {
+                          "jornada": "",
+                          "assincrono": false,
+                          "url": "https://example.com"
+                        }
+                      }
+                    ],
+                    "condicao": {
+                      "id": "1703693184917",
+                      "operador": "and",
+                      "filhos": [
+                        {
+                          "id": "-1703693184918",
+                          "propriedade": "path",
+                          "valor": "",
+                          "operador": "and",
+                          "operacao": "="
+                        }
+                      ]
+                    },
+                    "ordem": 0,
+                    "habilitado": true
+                  }
+                ] 
 components:
-  schemas:
+  schemas: 
+      type: object
+      properties:
+        id:
+          type: string
+        cod_iderf_vers_reg:
+          type: string
+          format: date
+        num_fun_col_cola:
+          type: string
+        ind_vers_ptva:
+          type: boolean
+        txt_objt_estr_list_regr:
+          type: array
+          items:
+            type: object
+            properties:
+              nome:
+                type: string
+              id:
+                type: string
+              descricao:
+                type: string
+              valor_regra:
+                type: object
+                properties:
+                  jornada:
+                    type: string
+                  assincrono:
+                    type: boolean
+                  url:
+                    type: string
+                    format: uri
+        condicao:
+          type: object
+          properties:
+            id:
+              type: string
+            operador:
+              type: string
+            filhos:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  propriedade:
+                    type: string
+                  valor:
+                    type: string
+                  operador:
+                    type: string
+                  operacao:
+                    type: string
+        ordem:
+          type: integer
+        habilitado:
+          type: boolean
+
     PedidoCreditoDTO:
       type: object
       properties:
