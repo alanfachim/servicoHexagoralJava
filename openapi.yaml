@@ -1,0 +1,317 @@
+openapi: 3.0.0
+info:
+  title: Pedido Credito API
+  description: Uma API para gerenciar pedidos de crédito
+  version: 1.0.0
+servers:
+  - url: http://exemple.com:443/pedidos
+    description: Servidor de produção
+paths:
+  /:
+    post:
+      summary: Cria um novo pedido de crédito com o produto informado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PedidoCreditoDTO'
+      responses:
+        '201':
+          description: Pedido criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PedidoCreditoDTO'
+        '400':
+          description: Pedido inválido
+        '500':
+          description: Erro interno do servidor
+      # Propriedades adicionais para a integração personalizada HTTP
+      x-amazon-apigateway-integration:
+        type: http_proxy # Tipo de integração
+        httpMethod: POST # Método HTTP do endpoint
+        uri: http://exemple.com:443/pedidos # Endpoint HTTP
+        connectionType: VPC_LINK # Tipo de conexão
+        connectionId: abcdefgh # ID do link VPC
+        passthroughBehavior: when_no_match # Comportamento de passagem dos dados
+        requestParameters: # Mapeamento dos parâmetros de solicitação
+          integration.request.body: method.request.body
+        responseParameters: # Mapeamento dos parâmetros de resposta
+          method.response.header.Content-Type: integration.response.header.Content-Type
+      x-amazon-apigateway-request-validator: all # Validador de solicitação
+    get:
+      summary: Faz uma consulta avançada nos pedidos usando vários critérios de filtragem e ordenação
+      parameters:
+        - name: codigoCliente
+          in: query
+          schema:
+            type: string
+          description: O código do cliente
+        - name: produto
+          in: query
+          schema:
+            type: string
+          description: O nome do produto
+        - name: valorMinimo
+          in: query
+          schema:
+            type: number
+          description: O valor mínimo do pedido
+        - name: valorMaximo
+          in: query
+          schema:
+            type: number
+          description: O valor máximo do pedido
+        - name: dataInicio
+          in: query
+          schema:
+            type: string
+            format: date
+          description: A data de início do período de consulta
+        - name: dataFim
+          in: query
+          schema:
+            type: string
+            format: date
+          description: A data de fim do período de consulta
+        - name: status
+          in: query
+          schema:
+            type: string
+          description: O status do pedido
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            default: codigo_pedido_credito
+          description: O campo pelo qual ordenar os pedidos
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: O número de pedidos por página
+        - name: pageNumber
+          in: query
+          schema:
+            type: integer
+            default: 0
+          description: O número da página atual
+      responses:
+        '200':
+          description: Uma lista de pedidos que satisfazem os critérios de consulta
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PedidoCreditoListDTO'
+        '500':
+          description: Erro interno do servidor
+      # Propriedades adicionais para a integração personalizada HTTP
+      x-amazon-apigateway-integration:
+        type: http_proxy # Tipo de integração
+        httpMethod: GET # Método HTTP do endpoint
+        uri: http://exemple.com:443/pedidos # Endpoint HTTP
+        connectionType: VPC_LINK # Tipo de conexão
+        connectionId: abcdefgh # ID do link VPC
+        passthroughBehavior: when_no_match # Comportamento de passagem dos dados
+        requestParameters: # Mapeamento dos parâmetros de solicitação
+          integration.request.querystring.codigoCliente: method.request.querystring.codigoCliente
+          integration.request.querystring.produto: method.request.querystring.produto
+          integration.request.querystring.valorMinimo: method.request.querystring.valorMinimo
+          integration.request.querystring.valorMaximo: method.request.querystring.valorMaximo
+          integration.request.querystring.dataInicio: method.request.querystring.dataInicio
+          integration.request.querystring.dataFim: method.request.querystring.dataFim
+          integration.request.querystring.status: method.request.querystring.status
+          integration.request.querystring.sortBy: method.request.querystring.sortBy
+          integration.request.querystring.pageSize: method.request.querystring.pageSize
+          integration.request.querystring.pageNumber: method.request.querystring.pageNumber
+        responseParameters: # Mapeamento dos parâmetros de resposta
+          method.response.header.Content-Type: integration.response.header.Content-Type
+      x-amazon-apigateway-request-validator: all # Validador de solicitação
+  /{codigo}:
+    get:
+      summary: Obtém um pedido de crédito pelo seu código e todos os eventos do pedido
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: O código do pedido
+      responses:
+        '200':
+          description: O pedido e seus eventos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListaPedidoEventosDTO'
+        '404':
+          description: Pedido não encontrado
+        '500':
+          description: Erro interno do servidor
+      # Propriedades adicionais para a integração personalizada HTTP
+      x-amazon-apigateway-integration:
+        type: http_proxy # Tipo de integração
+        httpMethod: GET # Método HTTP do endpoint
+        uri: http://exemple.com:443/pedidos/{codigo} # Endpoint HTTP
+        connectionType: VPC_LINK # Tipo de conexão
+        connectionId: abcdefgh # ID do link VPC
+        passthroughBehavior: when_no_match # Comportamento de passagem dos dados
+        requestParameters: # Mapeamento dos parâmetros de solicitação
+          integration.request.path.codigo: method.request.path.codigo
+        responseParameters: # Mapeamento dos parâmetros de resposta
+          method.response.header.Content-Type: integration.response.header.Content-Type
+      x-amazon-apigateway-request-validator: all # Validador de solicitação
+    put:
+      summary: Atualiza um pedido de crédito pelo seu código
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: O código do pedido
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PedidoCreditoDTO'
+      responses:
+        '200':
+          description: Pedido atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PedidoCreditoDTO'
+        '400':
+          description: Pedido inválido
+        '404':
+          description: Pedido não encontrado
+        '500':
+          description: Erro interno do servidor
+      # Propriedades adicionais para a integração personalizada HTTP
+      x-amazon-apigateway-integration:
+        type: http_proxy # Tipo de integração
+        httpMethod: PUT # Método HTTP do endpoint
+        uri: http://exemple.com:443/pedidos/{codigo} # Endpoint HTTP
+        connectionType: VPC_LINK # Tipo de conexão
+        connectionId: abcdefgh # ID do link VPC
+        passthroughBehavior: when_no_match # Comportamento de passagem dos dados
+        requestParameters: # Mapeamento dos parâmetros de solicitação
+          integration.request.path.codigo: method.request.path.codigo
+          integration.request.body: method.request.body
+        responseParameters: # Mapeamento dos parâmetros de resposta
+          method.response.header.Content-Type: integration.response.header.Content-Type
+      x-amazon-apigateway-request-validator: all # Validador de solicitação
+    delete:
+      summary: Deleta um pedido de crédito pelo seu código
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: O código do pedido
+      responses:
+        '204':
+          description: Pedido deletado com sucesso
+        '404':
+          description: Pedido não encontrado
+        '500':
+          description: Erro interno do servidor
+      # Propriedades adicionais para a integração personalizada HTTP
+      x-amazon-apigateway-integration:
+        type: http_proxy # Tipo de integração
+        httpMethod: PUT # Método HTTP do endpoint
+        uri: http://exemple.com:443/pedidos/{codigo} # Endpoint HTTP
+        connectionType: VPC_LINK # Tipo de conexão
+        connectionId: abcdefgh # ID do link VPC
+        passthroughBehavior: when_no_match # Comportamento de passagem dos dados
+        requestParameters: # Mapeamento dos parâmetros de solicitação
+          integration.request.path.codigo: method.request.path.codigo
+          integration.request.body: method.request.body
+        responseParameters: # Mapeamento dos parâmetros de resposta
+          method.response.header.Content-Type: integration.response.header.Content-Type
+      x-amazon-apigateway-request-validator: all # Validador de solicitação
+components:
+  schemas:
+    PedidoCreditoDTO:
+      type: object
+      properties:
+        codigo_pedido_credito:
+          type: string
+          format: uuid
+          description: O código do pedido
+        codigo_cliente:
+          type: string
+          description: O código do cliente
+        produto:
+          type: string
+          description: O nome do produto
+        valor:
+          type: number
+          description: O valor do pedido
+        data_pedido:
+          type: string
+          format: date-time
+          description: A data do pedido
+        status:
+          type: string
+          description: O status do pedido
+    PedidoCreditoListDTO:
+      type: object
+      properties:
+        codigo_pedido_credito:
+          type: string
+          format: uuid
+          description: O código do pedido
+        codigo_cliente:
+          type: string
+          description: O código do cliente
+        produto:
+          type: string
+          description: O nome do produto
+        valor:
+          type: number
+          description: O valor do pedido
+        data_pedido:
+          type: string
+          format: date-time
+          description: A data do pedido
+    ListaPedidoEventosDTO:
+      type: object
+      properties:
+        pedido:
+          $ref: '#/components/schemas/PedidoCreditoDTO'
+        eventos:
+          type: array
+          items:
+            $ref: '#/components/schemas/PedidoEventoDTO'
+    PedidoEventoDTO:
+      type: object
+      properties:
+        codigo_pedido_evento:
+          type: string
+          format: uuid
+          description: O código do evento
+        codigo_pedido_credito:
+          type: string
+          format: uuid
+          description: O código do pedido
+        tipo:
+          type: string
+          description: O tipo do evento
+        data:
+          type: string
+          format: date-time
+          description: A data do evento
+        descricao:
+          type: string
+          description: A descrição do evento
